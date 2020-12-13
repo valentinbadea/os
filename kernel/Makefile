@@ -2,11 +2,10 @@ TARGET ?= aarch64-none-elf
 CROSS ?= $(TARGET)
 
 CC := $(CROSS)-gcc
-CCFLAGS ?= -Wall -O2 -nostdlib -nostartfiles -ffreestanding -pie -fpie
+CCFLAGS := -Wall -O2 -nostdlib -nostartfiles -ffreestanding -pie -fpie
 # LDFLAGS ?= --gc-sections -static -pie -nostdlib -nostartfiles --no-dynamic-linker
 LDFLAGS ?= --gc-sections -static -nostdlib -nostartfiles --no-dynamic-linker
-XARGO ?= CARGO_INCREMENTAL=0 RUST_TARGET_PATH="$(shell pwd)" xargo
-
+CARGO := RUST_TARGET_PATH="$(shell pwd)" cargo
 LD_LAYOUT := ext/layout.ld
 
 RUST_BINARY := $(shell cat Cargo.toml | grep name | cut -d\" -f 2 | tr - _)
@@ -14,7 +13,7 @@ RUST_BUILD_DIR := target/$(TARGET)
 RUST_DEBUG_LIB := $(RUST_BUILD_DIR)/debug/lib$(RUST_BINARY).a
 RUST_RELEASE_LIB := $(RUST_BUILD_DIR)/release/lib$(RUST_BINARY).a
 
-RUST_DEPS = Xargo.toml Cargo.toml build.rs $(LD_LAYOUT) src/*
+RUST_DEPS = Cargo.toml build.rs $(LD_LAYOUT) src/*
 EXT_DEPS = $(BUILD_DIR)/init.o
 
 BUILD_DIR := build
@@ -28,15 +27,15 @@ VPATH = ext
 all: $(KERNEL).hex $(KERNEL).bin
 
 check:
-	@$(XARGO) check --target=$(TARGET)
+	@$(CARGO) check --target=$(TARGET)
 
 $(RUST_DEBUG_LIB): $(RUST_DEPS)
-	@echo "+ Building $@ [xargo]"
-	@$(XARGO) build --target=$(TARGET)
+	@echo "+ Building $@ [CARGO]"
+	@$(CARGO) build --target=$(TARGET)
 
 $(RUST_RELEASE_LIB): $(RUST_DEPS)
-	@echo "+ Building $@ [xargo --release]"
-	@$(XARGO) build --release --target=$(TARGET)
+	@echo "+ Building $@ [CARGO --release]"
+	@$(CARGO) build --release --target=$(TARGET)
 
 ifeq ($(DEBUG),1)
 $(RUST_LIB): $(RUST_DEBUG_LIB) | $(BUILD_DIR)
@@ -70,5 +69,5 @@ $(KERNEL).bin: $(KERNEL).elf | $(BUILD_DIR)
 	@$(CROSS)-objcopy $< -O binary $@
 
 clean:
-	$(XARGO) clean
+	@$(CARGO) clean
 	rm -rf $(BUILD_DIR)

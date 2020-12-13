@@ -1,6 +1,4 @@
-#![feature(decl_macro)]
-#![feature(optin_builtin_traits)]
-
+#![feature(decl_macro, auto_traits, negative_impls)]
 #![no_std]
 
 mod traits;
