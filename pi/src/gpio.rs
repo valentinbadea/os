@@ -22,9 +22,9 @@ pub enum Function {
 struct Registers {
     FSEL: [Volatile<u32>; 6],
     __r0: Reserved<u32>,
-    SET: [WriteVolatile<u32>; 2],
+    SET: [Volatile<u32>; 2],
     __r1: Reserved<u32>,
-    CLR: [WriteVolatile<u32>; 2],
+    CLR: [Volatile<u32>; 2],
     __r2: Reserved<u32>,
     LEV: [ReadVolatile<u32>; 2],
     __r3: Reserved<u32>,
@@ -102,7 +102,10 @@ impl Gpio<Uninitialized> {
     /// Enables the alternative function `function` for `self`. Consumes self
     /// and returns a `Gpio` structure in the `Alt` state.
     pub fn into_alt(self, function: Function) -> Gpio<Alt> {
-        unimplemented!()
+        let mask = (function as u32) << (3 * (self.pin % 10));
+        self.registers.FSEL[(self.pin / 10) as usize].and_mask(!mask);
+        self.registers.FSEL[(self.pin / 10) as usize].or_mask(mask);
+        self.transition()
     }
 
     /// Sets this pin to be an _output_ pin. Consumes self and returns a `Gpio`
@@ -121,12 +124,12 @@ impl Gpio<Uninitialized> {
 impl Gpio<Output> {
     /// Sets (turns on) the pin.
     pub fn set(&mut self) {
-        unimplemented!()
+        self.registers.SET[(self.pin / 32) as usize].or_mask(0x1u32 << (self.pin % 32));
     }
 
     /// Clears (turns off) the pin.
     pub fn clear(&mut self) {
-        unimplemented!()
+        self.registers.CLR[(self.pin / 32) as usize].or_mask(0x1u32 << (self.pin % 32));
     }
 }
 
@@ -134,6 +137,6 @@ impl Gpio<Input> {
     /// Reads the pin's value. Returns `true` if the level is high and `false`
     /// if the level is low.
     pub fn level(&mut self) -> bool {
-        unimplemented!()
+        self.registers.LEV[(self.pin / 32) as usize].has_mask(0x1u32 << (self.pin % 32))
     }
 }
