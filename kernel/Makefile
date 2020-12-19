@@ -24,7 +24,7 @@ RUST_LIB := $(BUILD_DIR)/$(RUST_BINARY).a
 
 VPATH = ext
 
-all: $(KERNEL).hex $(KERNEL).bin
+all: $(KERNEL).hex $(KERNEL).img
 
 check:
 	@$(CARGO) check --target=$(TARGET)
@@ -68,6 +68,9 @@ $(KERNEL).bin: $(KERNEL).elf | $(BUILD_DIR)
 	@echo "+ Building $@ [objcopy $<]"
 	@$(CROSS)-objcopy $< -O binary $@
 
+$(KERNEL).img: $(KERNEL).elf | $(BUILD_DIR)
+	@echo "+ Building $@ [objcopy $<]"
+	@$(CROSS)-objcopy $< -O binary $@
 clean:
 	@$(CARGO) clean
 	rm -rf $(BUILD_DIR)

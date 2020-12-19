@@ -1,11 +1,11 @@
 use core::fmt;
 
 use volatile::prelude::*;
-use volatile::{Volatile, ReadVolatile, Reserved};
+use volatile::{ReadVolatile, Reserved, Volatile};
 
-use timer;
 use common::IO_BASE;
-use gpio::{Gpio, Function};
+use gpio::{Function, Gpio};
+use timer;
 
 /// The base address for the `MU` registers.
 const MU_REG_BASE: usize = IO_BASE + 0x215040;
@@ -92,8 +92,8 @@ impl MiniUart {
 
 #[cfg(feature = "std")]
 mod uart_io {
-    use std::io;
     use super::MiniUart;
+    use std::io;
 
     // FIXME: Implement `io::Read` and `io::Write` for `MiniUart`.
     //
