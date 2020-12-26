@@ -18,14 +18,13 @@ pub mod shell;
 
 use pi::gpio::Gpio;
 use pi::timer::spin_sleep_ms;
+use pi::uart::MiniUart;
 
 #[no_mangle]
 pub unsafe extern "C" fn kmain() {
-    let mut gpio16 = Gpio::new(16).into_output();
+    let mut uart = MiniUart::new();
     loop {
-        gpio16.set();
-        spin_sleep_ms(3000);
-        gpio16.clear();
-        spin_sleep_ms(3000);
+        let x = uart.read_byte();
+        uart.write_byte(x);
     }
 }
